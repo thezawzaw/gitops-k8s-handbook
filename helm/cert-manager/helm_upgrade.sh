@@ -8,3 +8,5 @@ helm upgrade --install \
   cert-manager cert-manager/cert-manager \
   --values values.yaml --create-namespace --namespace cert-manager
 
+kubectl apply -f issuers/selfsigned-clusterissuer.yaml
+

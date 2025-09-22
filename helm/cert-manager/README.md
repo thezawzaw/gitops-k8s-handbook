@@ -27,6 +27,6 @@ $ ./helm_upgrade.sh
 
 ```sh
 NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
-cert-manager    cert-manager    2               2025-09-19 16:19:21.586692383 +0800 PST deployed        cert-manager-v1.18.2    v1.18.2
+cert-manager    cert-manager    4               2025-09-22 08:47:29.632660786 +0800 PST deployed        cert-manager-v1.18.2    v1.18.2
 ```
 
