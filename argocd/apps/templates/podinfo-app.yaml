@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: podinfo-app-dev
+  labels:
+    app: podinfo-app
+    env: dev
+spec:
+  destination:
+    namespace: dev
+    server: {{ .Values.spec.destination.server }}
+  source:
+    path: helm/podinfo-app
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
