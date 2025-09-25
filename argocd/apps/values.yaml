@@ -3,5 +3,5 @@ spec:
     server: https://kubernetes.default.svc
   source:
     repoURL: git@gitlab.com:zawzaw.me/k8s-gitops-airnav-dev.git
-    targetRevision: infra
+    targetRevision: main
 

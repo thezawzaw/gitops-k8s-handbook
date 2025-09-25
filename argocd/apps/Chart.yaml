@@ -1,6 +1,6 @@
 apiVersion: v2
-name: argo-infra-apps
-description: ArgoCD master app for infra namespace
+name: apps
+description: ArgoCD applications
 
 # A chart can be either an 'application' or a 'library' chart.
 #
