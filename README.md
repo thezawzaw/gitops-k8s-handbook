@@ -12,3 +12,7 @@ GitOps ArgoCD Configurations for the AirNav K8s Dev Cluster and Apps
 
  - `bootstrap_k3s.sh`: A shell script to boostrap and setup K3s Kubernetes cluster.
 
+## Documentation
+
+For detailed documentation, read the guide on [GitOps CI/CD in Kubernetes](./docs/README.md).
+
