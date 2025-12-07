@@ -2,7 +2,10 @@
 
 ## A Hands-on Practical Guide to Building a Fully Automated CI/CD Pipeline Using GitLab CI and GitOps Argo CD on Kubernetes
 
+**PDF Format:** [The PDF version of the GitOps CI/CD in Kubernetes Guide is available here](./pdfs/k8s-gitops-cicd-guide.pdf).
+
 ![gitops-featured-image](./images/img_k8s_gitops_cicd_drawio.png)
+
 
 ## Introduction
 
