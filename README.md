@@ -2,7 +2,7 @@
 
 GitOps ArgoCD Configurations for the AirNav K8s Dev Cluster and Apps
 
-## Project Structure
+## GitOps Repository Structure
 
  - `argocd/argocd-infra-apps`: ArgoCD Applications
 
