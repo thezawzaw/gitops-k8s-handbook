@@ -55,31 +55,26 @@ securityContext: {}
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  type: ClusterIP
+  type: NodePort
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 80
   targetPort: 5005
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
-  enabled: true
-  className: "nginx"
-  annotations:
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-    cert-manager.io/cluster-issuer: selfsigned-clusterissuer
-    cert-manager.io/common-name: podinfo-dev.ops.io
-    cert-manager.io/subject-organizations: "AirNav Ops"
-
+  enabled: false
+  className: "traefik"
+  annotations: {}
+    # kubernetes.io/ingress.class: traefik
+    # cert-manager.io/cluster-issuer: selfsigned-clusterissuer
+    # cert-manager.io/common-name: podinfo-dev.example.io
+    # cert-manager.io/subject-organizations: "Example Org"
   hosts:
-    - host: podinfo-dev.ops.io
+    - host: podinfo-dev.example.local
       paths:
         - path: /
           pathType: ImplementationSpecific
-  tls:
-    - hosts:
-        - podinfo-dev.ops.io
-      secretName: tls-secret-podinfo-dev-io
+  tls: []
 
 # -- Expose the service via gateway-api HTTPRoute
 # Requires Gateway API resources and suitable controller installed within the cluster

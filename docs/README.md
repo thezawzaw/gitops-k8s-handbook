@@ -177,11 +177,17 @@ Before you begin, make sure you have learned the basics of GitLab CI and YAML sy
  - Get started with GitLab CI: https://docs.gitlab.com/ci/
  - CI/CD YAML Syntax Reference: https://docs.gitlab.com/ci/yaml/
 
-### Installing a GitLab Runner
+### Installing and Registering a GitLab Runner
 
-In this guide, I will use a self-managed GitLab Runner for running GitLab CI jobs for more control. but it's OPTIONAL. You can also use GitLab-hosted GitLab Runners. If you want to use GitLab-hosted Runners, please see [https://docs.gitlab.com/ci/runners/hosted_runners/linux/](https://docs.gitlab.com/ci/runners/hosted_runners/linux/).
+> [!NOTE]
+>
+> In this guide, I will use a self-managed GitLab Runner for running GitLab CI jobs for full control, but it's OPTIONAL.
+>
+> You can also use GitLab-hosted Runners. Please see [https://docs.gitlab.com/ci/runners/hosted_runners/linux/](https://docs.gitlab.com/ci/runners/hosted_runners/linux/). These Runners are managed and hosted by GitLab. You can use these GitLab Runners without installing and registering your own GitLab Runners.
+>
+> If you want to use GitLab-hosted Runners, you can skip this step.
 
-> GitLab provides the GitLab Runner packages for most Linux distributions. But, installation depends on your Linux distribution. In this guide, I will focus on RHEL-based Linux systems.
+GitLab provides the GitLab Runner packages for most Linux distributions. But, installation depends on your Linux distribution. In this guide, I will focus on RHEL-based Linux systems.
 
 Add the following GitLab RPM repository (e.g., Fedora Linux):
 
@@ -202,8 +208,6 @@ $ sudo dnf install gitlab-runner
 ```
 
 For any other Linux distributions, please see [https://docs.gitlab.com/runner/install/linux-repository/](https://docs.gitlab.com/runner/install/linux-repository/).
-
-### Registering a GitLab Runner
 
 After you install a GitLab Runner, you need to register this for your Podinfo Git repository. Firstly, you need to fork the Podinfo sample application repository that I've mentioned previously. *(If you have already forked, you don't need to fork again.)*
 
@@ -290,21 +294,21 @@ Go to your Podinfo Git repository >> <kbd>Project Settings</kbd> >> <kbd>CI/CD</
 
 > [!NOTE]
 >
-> Replace with your container registry credentials.
+> Replace with your Container registry credentials.
 >
 > - Key: `REGISTRY_HOST`, Value: `<your-registry-host>`
 > - Key: `DOCKER_CFG`, Value: `<your-registry-auth-creds>`
-
-`REGISTRY_HOST` for your container registry host.
-
-`DOCKER_CFG` for login credentials to access your container registry server.
 
 *For Example,*
 
 | Key | Value |
 | --- | --- |
-| `REGISTRY_HOST` | `harbor-repo-example.ops.io` |
-| `DOCKER_CFG` | `{"auths": {"harbor-repo-example.ops.io": {"auth": "YWRtaW46SGFyYm9yMTIzNDU="}}}` |
+| `REGISTRY_HOST` | `harbor-repo-example.io` |
+| `DOCKER_CFG` | `{"auths": {"harbor-repo-example.io": {"auth": "emF3emF3OkhhcmJvckV4YW1wbGVQYXNzd29yZAo="}}}` |
+
+ - `REGISTRY_HOST`: for your Container registry host.
+
+ - `DOCKER_CFG`: for the credentials to access your Container registry server. You can find your Docker login credentials in the `~/.docker/config.json` file of the host machine.
 
 I've already created `.gitlab-ci.yml` GitLab CI configuration on the Podinfo Git repository. But, you can write your own `.gitlab-ci.yml` configuration under your Podinfo sample project's root directory.
 
@@ -320,7 +324,6 @@ GitLab CI Configuration [https://gitlab.com/thezawzaw/podinfo-sample/-/blob/main
 #
 stages:
   - build
-  - scan
 
 # Define global variables here.
 variables:
@@ -354,31 +357,6 @@ variables:
       --tag ${IMAGE_REPO}:${TARGET_IMAGE_TAG} .
     - buildah push --tls-verify=false ${IMAGE_REPO}:${TARGET_IMAGE_TAG}
     - buildah rmi -f ${IMAGE_REPO}:${TARGET_IMAGE_TAG}
-
-# Template ---> template_trivy_scan
-# to scan and find vulnerabilities of the Docker container images.
-.template_trivy_scan: &template_trivy_scan
-  stage: scan
-  image:
-    name: docker.io/aquasec/trivy:0.67.2
-    entrypoint: [""]
-  variables:
-    TRIVY_SEVERITY: "HIGH,CRITICAL"
-    TRIVY_EXIT_CODE: "1"
-    TARGET_IMAGE_TAG: ""
-  script:
-    - echo "Scanning Docker container image [ $IMAGE_REPO:$TARGET_IMAGE_TAG ]..."
-    - >-
-      trivy --cache-dir "${CI_PROJECT_DIR}/trivy/"
-      image
-      --image-src remote
-      --insecure ${IMAGE_REPO}:${TARGET_IMAGE_TAG}
-  cache:
-    key: trivy-cache
-    paths:
-      - "${CI_PROJECT_DIR}/trivy/"
-  when: manual
-
 
 ##########################################################################################
 #                                                                                        #
@@ -418,44 +396,11 @@ build-image-tag:
     TARGET_IMAGE_TAG: "${CI_COMMIT_TAG}"
   rules:
     - if: "$CI_COMMIT_TAG"
-
-#
-# Scan CI Job ---> trivy-scan-dev
-# to scan and find vulnerabilities of the Docker container image when you push changes into the 'develop' branch.
-#
-trivy-scan-dev:
-  <<: *template_trivy_scan
-  variables:
-    TARGET_IMAGE_TAG: "${CI_COMMIT_REF_SLUG}"
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-
-#
-# Scan CI Job ---> trivy-scan-main
-# to scan and find vulnerabilities of the Docker container image when push changes into the 'main' branch.
-#
-trivy-scan-main:
-  <<: *template_trivy_scan
-  variables:
-    TARGET_IMAGE_TAG: "latest"
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-
-#
-# Scan CI Job ---> trivy-scan-tag
-# to scan and find vulnerabilities of the Docker container image when you create a Git tag.
-#
-trivy-scan-tag:
-  <<: *template_trivy_scan
-  variables:
-    TARGET_IMAGE_TAG: "${CI_COMMIT_TAG}"
-  rules:
-    - if: "$CI_COMMIT_TAG"
 ```
 
 **_Explanation:_**
 
-When you push some changes into the Podinfo Git repository, GitLab CI builds and pushes the Docker container image of the Podinfo application to your internal Docker container registry server.
+When you push some changes into the Podinfo Git repository, GitLab CI builds the Docker container image of the Podinfo application using [Buildah](https://github.com/containers/buildah) and then, pushes the image to your Container registry server.
 
 Container image name format ⟶  `<your-container-registry>/library/podinfo-sample:<image-tag-name>`
 
@@ -465,15 +410,15 @@ Container image name format ⟶  `<your-container-registry>/library/podinfo-samp
 
 *For Example,*
 
-When I push some changes into the `master` branch, the container image name is `harbor-dev-repo.ops.io/library/podinfo-sample:latest`. You can also see the logs in the GitLab CI build job's logs. For reference, please see [https://gitlab.com/thezawzaw/podinfo-sample/-/jobs/12120436761](https://gitlab.com/thezawzaw/podinfo-sample/-/jobs/12120436761)
+When I push some changes into the `master` branch, the container image name is `harbor-repo-example.io/library/podinfo-sample:latest`. You can also see the logs in the GitLab CI build job's logs. For reference, please see [https://gitlab.com/thezawzaw/podinfo-sample/-/jobs/12120436761](https://gitlab.com/thezawzaw/podinfo-sample/-/jobs/12120436761)
 
 ```
-...
-[2/2] COMMIT harbor-dev-repo.ops.io/library/podinfo-sample:latest
---> Pushing cache [harbor-dev-repo.ops.io/library/podinfo-sample/cache]:23c4fe872d978253fd66b2a50aa2d6e40da8a09c9f5fd79910fdf7855fc88d7a
+[2/2] COMMIT harbor-repo-example.io/library/podinfo-sample:latest
+--> Pushing cache [harbor-repo-example.io/library/podinfo-sample/cache]:23c4fe872d978253fd66b2a50aa2d6e40da8a09c9f5fd79910fdf7855fc88d7a
 --> 048e6533805b
-Successfully tagged harbor-dev-repo.ops.io/library/podinfo-sample:latest
+Successfully tagged harbor-repo-example.io/library/podinfo-sample:latest
 048e6533805b842328e03e7b1b9b2b5efdf2bce11d706283690a8dde4afc78d3
+...
 ```
 
 ---
@@ -568,14 +513,22 @@ Please, see the detailed documentation on how to install Kubernetes Dashboard: [
 
 ---
 
-## [4] Building a Kubernetes Helm Chart from Scratch
+## [4] Writing a Kubernetes Helm Chart from Scratch
 
-Before you write a Kubernetes Helm chart for the Podinfo sample application, make sure you understand Kubernetes core components and resource types. For example, Kubernetes cluster architecture, nodes, services, pods, deployments, ingress, and so on.
+> Before you write a Kubernetes Helm chart for the Podinfo sample application, make sure you understand **Kubernetes core components**, **Kubernete objects** and **workloads resources** first. If you are not familiar with Kubernetes, you can start with the [Kubernetes Basics](https://kubernetes.io/docs/tutorials/kubernetes-basics) tutorial.
+> 
+> Useful tutorials and guides to learn Kubernetes:
+>
+>  - Learn Kubernetes Basics: [https://kubernetes.io/docs/tutorials/kubernetes-basics](https://kubernetes.io/docs/tutorials/kubernetes-basics/)
+>  - Kubernetes Core Concepts and Components: [https://kubernetes.io/docs/concepts/](https://kubernetes.io/docs/concepts/)
 
-Firstly, you must learn to understand Kubernetes basics. If you are a beginner, I would like to recommend the following useful links to learn Kubernetes:
+In this section, I will write a Kubernetes Helm chart from scratch for the Podinfo Python application. I had published an article, and you can also learn about how to write a Kubernetes Helm chart from scratch with this article.
 
-- Learn Kubernetes Basics: [https://kubernetes.io/docs/tutorials/kubernetes-basics](https://kubernetes.io/docs/tutorials/kubernetes-basics/)
-- Kubernetes Core Concepts and Components: [https://kubernetes.io/docs/concepts/](https://kubernetes.io/docs/concepts/)
+ - **Writing a Kubernetes Helm Chart from Scratch:** [https://www.zawzaw.blog/k8s-write-k8s-helm-chart/](https://www.zawzaw.blog/k8s-write-k8s-helm-chart/)
+
+For reference, I've already written a Helm chart for the Podinfo Python application. Please, see the **Podinfo Helm Chart** on the following GitOps repository.
+
+ - **Podinfo Helm Chart:** [https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/tree/main/helm/podinfo-app](https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/tree/main/helm/podinfo-app)
 
 ### Introduction to Helm
 
@@ -602,17 +555,7 @@ $ chmod 700 get_helm.sh && ./get_helm.sh
 
 You can install the Helm command-line tool with any other package managers. Please, see on the Helm documentation: [https://helm.sh/docs/intro/install#through-package-managers](https://helm.sh/docs/intro/install#through-package-managers).
 
-### Writing a Helm Chart for the Podinfo application
-
-In this section, I will write a Kubernetes Helm chart from scratch for the Podinfo Python application. I had published an article, and you can also learn about how to write a Kubernetes Helm chart from scratch with the following article.
-
- - **Writing a Kubernetes Helm Chart from Scratch:** [https://www.zawzaw.blog/k8s-write-k8s-helm-chart/](https://www.zawzaw.blog/k8s-write-k8s-helm-chart/)
-
-For reference, I've already written a Helm chart for the Podinfo Python application. Please, see the following GitOps repository.
-
- - **K8s GitOps Repository:** [https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/tree/main/helm/podinfo-app](https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/tree/main/helm/podinfo-app)
-
-#### Understanding application concepts
+### Understanding application concepts
 
 Before you write a Helm chart for your Podinfo application, make sure you understand the application's concept and how the application works.
 
@@ -660,13 +603,9 @@ It's key/value form like this:
  - `POD_NAME`=`metadata.name`
  - `POD_IP`=`status.podIP`
 
-#### Initializing a Helm Chart with Helm CLI
+### Creating a Helm Chart with Helm CLI
 
-Before you start, make sure you understand **Kubernete objects** and **workloads resources** first. If you are not familiar with Kubernetes, you can learn with the [Kubernetes Basics](https://kubernetes.io/docs/tutorials/kubernetes-basics) tutorial.
-
-Learn Kubernetes Basics: [https://kubernetes.io/docs/tutorials/kubernetes-basics]https://kubernetes.io/docs/tutorials/kubernetes-basics)
-
-Create a Helm chart with the Helm CLI tool.
+Create a Helm chart with the Helm command-line tool:
 
 ```sh
 $ helm create pod-info
@@ -694,7 +633,7 @@ Then, Helm automatically generates required Helm templates and values like this:
 2 directories, 10 files
 ```
 
-#### Customizing and Configuring Helm Chart
+### Customizing and Configuring Helm Chart
 
 Basically, Helm Charts have main three categories:
 
@@ -716,19 +655,26 @@ In the other words, Helm charts are pre-configured configurations and packages a
 After initialize a new Helm chart, we need to customize Helm templates and values as you need. It depends on your web application.
 For pod-info Helm chart, we need to configure the following steps.
 
+---
+
 #### Set Docker container image
 
-- In the `values.yaml` file, define variables for the Docker container image that we've built and pushed to your container registry.
+_**Values ▸ {HELM_CHART_ROOT}/values.yaml**_
 
-  ```yaml
-  image:
-    repository: harbor-dev-repo.ops.io/library/podinfo-sample:latest
-    pullPolicy: IfNotPresent
-    tag: "latest"
-  ```
+In the `values.yaml` file, define variables for the Docker container image that we've built and pushed to your container registry.
 
-- In the `templates/deployment.yaml` file, we can set variables from values.yaml with `.Values.image.repository`, `.Values.image.pullPolicay` and `.Values.image.tag`.
-It's YAML-based Helm template language syntax. You can learn on [The Chart Template Developer's Guide](https://helm.sh/docs/chart_template_guide).
+```yaml
+image:
+  repository: harbor-repo-example.io/library/podinfo-sample:latest
+  pullPolicy: IfNotPresent
+  tag: "latest"
+```
+</br>
+
+_**Deployment Template ▸ {HELM_CHART_ROOT}/templates/deployment.yaml**_
+
+In the `templates/deployment.yaml` file, we can set variables from values.yaml with `.Values.image.repository`, `.Values.image.pullPolicay` and `.Values.image.tag`. It's YAML-based Helm template language syntax. You can learn on [The Chart Template Developer's Guide](https://helm.sh/docs/chart_template_guide).
+
   - Get Docker image repository: `.Values.image.repository`
   - Get Docker image pull policy: `.Values.image.pullPolicy`
   - Get Docker image tag: `.Values.image.tag`
@@ -742,9 +688,13 @@ containers:
     imagePullPolicy: {{ .Values.image.pullPolicy }}
 ```
 
+---
+
 #### Set Service Port and Target Port
 
-- In the `values.yaml` file, define variables for sevice type, port and targetPort.
+_**Values ▸ {HELM_CHART_ROOT}/values.yaml**_
+
+In the `values.yaml` file, define variables for sevice type, port and targetPort.
 
   ```yaml
   service:
@@ -752,8 +702,12 @@ containers:
     port: 80
     targetPort: http
   ```
+</br>
 
-- In `templates/service.yaml` file, we can set service varibales from values.yaml file like this:
+_**Service Template ▸ {HELM_CHART_ROOT}/templates/service.yaml**_
+
+In `templates/service.yaml` file, we can set service varibales from values.yaml file like this:
+  
   - Get service type: `.Values.service.type`
   - Get service port: `.Values.service.port`
   - Get service target port: `.Values.service.targetPort`
@@ -768,17 +722,26 @@ spec:
       name: http
 ```
 
+---
+
 #### Set Target Docker Container Port
 
-- In the `values.yaml` file, define a variable for the Container port number that the Podinfo app is serving and listening to.
+_**Values ▸ {HELM_CHART_ROOT}/values.yaml**_
+
+In the `values.yaml` file, define a variable for the Container port number that the Podinfo app is serving and listening to.
 
 ```yaml
 deployment:
   containerPort: 5005
 ```
 
-- In the `templates/deployment.yaml` file, set target Docker container port variable from values.yaml file:
-  - Get target container port: `.Values.deployment.containerPort`
+</br>
+
+_**Deployment Template ▸ {HELM_CHART_ROOT}/templates/deployment.yaml**_
+
+In the `templates/deployment.yaml` file, set target Docker container port variable from values.yaml file:
+
+Get target container port: `.Values.deployment.containerPort`
 
 ```yaml
 containers:
@@ -789,9 +752,13 @@ containers:
       protocol: TCP
 ```
 
+---
+
 #### Set Environment Varibales
 
-- In the `values.yaml` file, define environment variables that the Podinfo application retrieves the data in UI.
+_**Values ▸ {HELM_CHART_ROOT}/values.yaml**_
+
+In the `values.yaml` file, define environment variables that the Podinfo application retrieves the data in UI.
 
 ```yaml
 deployment:
@@ -814,7 +781,11 @@ deployment:
           fieldPath: status.podIP
 ```
 
-- In `templates/deployment.yaml`, set environment variables dynamically from the values.yaml file. When you need to pass the array and whole config block into Helm templates, you can use `- with` and `- toYaml`.
+</br>
+
+_**Deployment Template ▸ {HELM_CHART_ROOT}/templates/deployment.yaml**_
+
+In `templates/deployment.yaml`, set environment variables dynamically from the values.yaml file. When you need to pass the array and whole config block into Helm templates, you can use `- with` and `- toYaml`.
 
 ```yaml
 containers:
@@ -825,7 +796,9 @@ containers:
     {{- end }}
 ```
 
-#### Debugging the Helm Templates
+---
+
+### Debugging the Helm Templates
 
 After you build Helm chart for the Podinfo application, we can debug and test Helm templates with `helm template` command. So, `helm template` CLI shows passed real values into templates.
 
@@ -911,7 +884,7 @@ spec:
         - name: pod-info
           securityContext:
             {}
-          image: "harbor-dev-repo.ops.io/library/podinfo-sample:latest"
+          image: "harbor-repo-example.io/library/podinfo-sample:latest"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -972,7 +945,7 @@ spec:
   restartPolicy: Never
 ```
 
-#### Deploying the Podinfo Helm Chart Manually on Kubernetes Cluster
+### Deploying the Podinfo Helm Chart Manually on Kubernetes Cluster
 
 You can now deploy the Podinfo application with Helm chart manually on your Kubernetes cluster.
 
@@ -1022,18 +995,32 @@ spec:
     app.kubernetes.io/instance: pod-info-dev
 ```
 
-To get the NodePort URL of the Podinfo application, run the following commands. *(Replace with your Namespace and Pod name)*
+> [!NOTE]
+>
+> In this guide, I will focus on a simple NodePort service configuration to access the Podinfo application from the outside of the cluster for testing purposes only.
+>
+>  - If you want to use Ingress to access the Podinfo application with the domain name, you can enable in the `.values.yaml` file [https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/blob/main/helm/podinfo-app/values.yaml](https://gitlab.com/thezawzaw/k8s-gitops-airnav-sample/-/blob/main/helm/podinfo-app/values.yaml#L63).
+>  - For setting up the Ingress for more information can be found here [https://kubernetes.io/docs/concepts/services-networking/ingress/](https://kubernetes.io/docs/concepts/services-networking/ingress/) (or) you can use Gateway API [https://gateway-api.sigs.k8s.io/](https://gateway-api.sigs.k8s.io/) to access the Podinfo app from the outside of the Kubernetes cluster.
+>
+
+To get the NodePort URL of the Podinfo application, run the following commands. *(Replace with your Namespace and Service Name.)*
 
 ```sh
-$ export NODE_PORT=$(kubectl get --namespace dev -o jsonpath="{.spec.ports[0].nodePort}" services pod-info-dev)
+$ export NODE_PORT=$(kubectl get services pod-info-dev --namespace dev -o jsonpath="{.spec.ports[0].nodePort}")
 $ export NODE_IP=$(kubectl get nodes --namespace dev -o jsonpath="{.items[0].status.addresses[0].address}")
 $ echo http://$NODE_IP:$NODE_PORT
 ```
 
-Then, you can access the Podinfo application with the following URL in your web browser. *(Replace with your Kubernete Node IP address.)*
+Then, it shows the URL of the Podinfo application and then you can access it in your web browser.
 
 ```sh
-http://<192.168.x.x>:32431
+http://<192.168.x.x>:<your-node-port>
+```
+
+*For Example,*
+
+```sh
+http://192.168.10.5:32431
 ```
 
 ![screenshot-podinfo-helm-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
