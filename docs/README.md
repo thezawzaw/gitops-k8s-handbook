@@ -6,31 +6,51 @@
 
 ![gitops-featured-image](./images/img_k8s_gitops_cicd_drawio.png)
 
-
 ## Introduction
 
-This hands-on practical guide is to demonstrate GitOps CI/CD automation in Kubernetes with GitLab CI and Argo CD using the [podinfo-sample](https://gitlab.com/thezawzaw/podinfo-sample) Python application. It mainly focuses on how to containerize an application, configure Continuous Integration (CI), Continuous Deployment (CD) and fully automated application deployment on Kubernetes.
+This hands-on practical guide is to demonstrate GitOps CI/CD automation in Kubernetes with GitLab CI and Argo CD using the [podinfo-sample](https://gitlab.com/thezawzaw/podinfo-sample) Python application. It mainly focuses on building end-to-end CI/CD pipeline — how to containerize an application, configure Continuous Integration (CI), Continuous Deployment (CD) and fully automate application deployment on Kubernetes.
 
 ## Summary: Objectives
 
-What you'll learn in this hands-on practical guide:
+What you'll learn in this practical guide:
 
-- Write a [Dockerfile](https://docs.docker.com/reference/dockerfile/) to containerize a sample Python application.
-- Configure the [GitLab CI](https://docs.gitlab.com/ci/) pipeline to build and push Docker container images using Buildah.
-- Setup a Kubernetes Cluster with [K3s, Lightweight Kubernetes](https://k3s.io/).
-- Write a [Helm Chart](https://helm.sh/) to deploy the podinfo-sample Python application on Kubernetes.
-- Configure [Argo CD](https://argo-cd.readthedocs.io/en/stable/) as GitOps CD to deploy applications automatically on Kubernetes.
-- Configure [Argo CD Image Updater](https://argocd-image-updater.readthedocs.io/en/stable/) to automate updating and pulling the Docker container images automatically.
+- **Step (1): Containerizing an application**  
+  _In this section, you'll learn how to write a [Dockerfile](https://docs.docker.com/reference/dockerfile/) to containerize a sample Python application._
 
-This GitOps hands-on practical guide is based on the [GitOps in Kubernetes with GitLab CI and ArgoCD](https://levelup.gitconnected.com/gitops-in-kubernetes-with-gitlab-ci-and-argocd-9e20b5d3b55b) article by Poom Wettayakorn. But, I will share more details and focus on a beginner-friently guide.
+- **Step (2): Building GitLab CI Pipeline**  
+  _In this section, you'll learn how to configure a [GitLab CI](https://docs.gitlab.com/ci/) pipeline to build and push Docker container images using Buildah._
 
-## Prerequisites
+- **Step (3): Creating a Kubernetes Cluster**  
+  _In this you'll learn how to set up a Kubernetes Cluster with [K3s, Lightweight Kubernetes](https://k3s.io/)._
+ 
+- **Step (4): Writing a Kubernetes Helm Chart from Scratch**  
+  _In this section, you'll learn how to write a [Helm Chart](https://helm.sh/) to deploy the Podinfo Python sample application on Kubernetes._
+
+- **Step (5): Configuring GitOps Argo CD on Kubernetes**  
+  _In this section, you'll learn how to set up and configure [Argo CD](https://argo-cd.readthedocs.io/en/stable/) as GitOps CD to deploy applications automatically on Kubernetes._
+
+- **Setup (6): Configuring Argo CD Image Updater**  
+  _In this section, you'll learn how to set up and configure [Argo CD Image Updater](https://argocd-image-updater.readthedocs.io/en/stable/) to automate updating and pulling the Docker container images automatically on Kubernetes._
+
+This GitOps CI/CD in Kubernetes hands-on practical guide is based on Poom Wettayakorn's [webapp](https://gitlab.com/gitops-argocd-demo/webapp), but I will share more details and focus on a beginner-friendly guide.
+
+## Before You Begin
 
 Make sure you have installed the following:
 
 - Familiar with basic Linux commands
 - Docker Engine
 - Linux installed VM or server or local machine (e.g., Ubuntu, Fedora, RHEL, etc.)
+
+## Introduction to GitOps
+
+GitOps is a set of practices fo managing infrastructure and application configurations using the Git repositories as a single source of truth. It's an important part of implementing DevOps practices and building CI/CD pipelines.
+
+GitOps delivers:
+
+ - A standard workflow for app deployments.
+ - Improved reliability and visibility with Git version control.
+ - Consistency across clusters, cloud, and on-premises environments.
 
 ## [1] Containerizing an application
 
@@ -965,6 +985,7 @@ $ helm install <helm_release_name> <helm_chart_path> \
 *For Example:*
 
 ```sh
+$ cd helm/podinfo-app
 $ helm install podinfo-app-dev ./ \
   --values values.yaml \
   --create-namespace \
@@ -1037,4 +1058,135 @@ http://192.168.10.20:30352
 ![screenshot-podinfo-helm-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
 
 Now, you can see **Namespace**, **Node Name**, **Pod Name**, and **Pod IP** address information in the UI of the Podinfo application.
+
+---
+
+## [5] Installing and Configuring Argo CD on Kubernetes
+
+![screenshot-argocd-ui](./images/img_screenshot_argocd_ui.png)
+
+In this section, you will learn how to install and configure Argo CD on Kubernetes to deploy the apps automatically using the GitOps repositories. For example, GitLab or GitHub repositories.
+
+Basically, Argo CD is a declarative, GitOps continuous delivery tool for Kubernetes that automates Kubernetes deployments using the GitOps repositories as the single source of truth and provides declarative configuration management, self-healing, automatic syncing, rollbacks, a user-friendly web UI, and improved visibility.
+
+Argo CD supports the following configuration options to deploy the apps:
+
+ - [Kustomize](https://kustomize.io/)
+ - [Jsonnet](https://jsonnet.org/articles/kubernetes.html)
+ - [Helm Charts](https://helm.sh/)
+ - [Plan YAML Manifests](https://kubernetes.io/docs/concepts/overview/working-with-objects/)
+
+**Reasons why we use ArgoCD:**
+
+ - We don't want to deploy Kubernetes configurations manually.
+ - We need to deploy Kubernetes configurations of the apps automatically when we push the changes into the GitOps repository. (e.g., GitLab, GitHub or any other Git server)
+
+**What ArgoCD does:**
+
+  - Automates Kubernetes deployments using Git or Helm repositories.
+  - Synchronizes and deploys the changes automatically when you push changes into the Git repository.
+  - Provides self-healing, automatic syncing, a user-friendly web UI, rollbacks, and live monitoring for your Kubernetes application deployments.
+
+For more information on Argo CD supported features: [https://argo-cd.readthedocs.io/en/stable/#features](https://argo-cd.readthedocs.io/en/stable/#features)
+
+ - Documentation: [https://argo-cd.readthedocs.io/en/stable/](https://argo-cd.readthedocs.io/en/stable/)
+ - Understand the Basics: [https://argo-cd.readthedocs.io/en/stable/understand_the_basics/](https://argo-cd.readthedocs.io/en/stable/understand_the_basics/)
+
+### Installing Argo CD on Kubernetes
+
+In this guide, I will use **Helm** command-line tool and Helm Chart to install to Argo CD on Kubernetes.
+You can also use plan YAML manifests to set up and install Argo CD. If you want to use plan YAML manifests, please see [https://argo-cd.readthedocs.io/en/stable/getting_started/#1-install-argo-cd](https://argo-cd.readthedocs.io/en/stable/getting_started/#1-install-argo-cd)
+
+The Official Helm Chart of Argo CD: [https://artifacthub.io/packages/helm/argo/argo-cd](https://artifacthub.io/packages/helm/argo/argo-cd)
+
+Add the Argo CD Helm repository.
+
+```sh
+helm repo add argo https://argoproj.github.io/argo-helm
+```
+
+Generate a Bcrypt hash for your desired password before installing the Argo CD Helm Chart. By default, Argo CD uses Bcrypt for the admin credentials. You can also the online Bcrypt generator, for example, https://bcrypt-generator.com. *(Replace with your actual Argo CD admin password.)*
+
+```sh
+export ARGOCD_ADMIN_PASSWORD="argo#nyQ7k+=aqGZ$+k^9"
+htpasswd -nbBC 10 "" ${ARGOCD_ADMIN_PASSWORD} | tr -d ':\n' | sed 's/$2y/$2a/'
+```
+
+Install the Argo CD with the Helm command-line tool. This command installs Argo CD with the admin password you've generated and the NodePort Service type in the `argocd` namespace.
+
+```sh
+helm install argocd argo/argo-cd \
+  --set configs.secret.argocdServerAdminPassword="$2a$10$ztg365OPPOKAbIQO7/mGZuXDZrF09tPH18f1pbjH9jfAU72vaTzv6" \
+  --set server.service.type=NodePort \
+  --create-namespace \
+  --namespace argocd
+```
+
+Then, check the Argo CD pods with the `kubectl` command tool.
+
+```sh
+kubectl get pods --namespace argocd
+```
+
+```sh
+NAME                                                READY   STATUS    RESTARTS         AGE
+argocd-application-controller-0                     1/1     Running   38 (6h51m ago)   4d
+argocd-applicationset-controller-5c955989bb-8hvwh   1/1     Running   38 (6h51m ago)   4d
+argocd-dex-server-659656656c-nm224                  1/1     Running   38 (6h51m ago)   4d
+argocd-image-updater-5f57d47bcb-4phx9               1/1     Running   8 (6h51m ago)    4d
+argocd-notifications-controller-5fb96859b5-wsshv    1/1     Running   38 (6h51m ago)   4d
+argocd-redis-697bd44875-nglks                       1/1     Running   38 (6h51m ago)   4d
+argocd-repo-server-64754bc5c5-fx2nt                 1/1     Running   80 (6h49m ago)   4d
+argocd-server-56cb5b5cb4-gdtvx                      1/1     Running   84 (6h49m ago)   4d
+```
+
+### Accessing the Argo CD UI
+
+Argo CD also supports the web UI to create and manage your Kubernetes deployments. To access the Argo CD UI from the outside of the cluster, you can use **NodePort** or **Ingress** configuration.
+
+> In this guide, I will NodePort for a simple Service configuration for testing purposes only.
+> You can also use Ingress to access the Argo CD UI with your desired domain name. If you want to enable this, please see [https://artifacthub.io/packages/helm/argo/argo-cd#ingress-configuration](https://artifacthub.io/packages/helm/argo/argo-cd#ingress-configuration)
+
+
+To get the NodePort port number of the Argo CD Service, run the following the `kubectl` command-line tool. (*In this example, the HTTP NodePort number is `30080`.*)
+
+```sh
+kubectl describe service argocd-server --namespace argocd
+```
+```sh
+
+Name:                     argocd-server
+Namespace:                argocd
+...
+Type:                     NodePort
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.43.136.195
+IPs:                      10.43.136.195
+Port:                     http  80/TCP
+TargetPort:               8080/TCP
+NodePort:                 http  30080/TCP
+Endpoints:                10.42.0.8:8080
+Port:                     https  443/TCP
+TargetPort:               8080/TCP
+NodePort:                 https  30443/TCP
+Endpoints:                10.42.0.8:8080
+...
+```
+
+To get the Node IP address of your Kubernetes cluster, run the `kubectl get node` command. *(In this example, the Node IP address is `192.168.10.20`.)*
+
+```sh
+kubectl get node -o wide
+```
+```
+AME                    STATUS   ROLES                  AGE   VERSION        INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                      KERNEL-VERSION                 CONTAINER-RUNTIME
+airnav-dev-k3s-server   Ready    control-plane,master   76d   v1.33.4+k3s1   192.168.10.20   <none>        AlmaLinux 9.6 (Sage Margay)   5.14.0-570.42.2.el9_6.x86_64   containerd://2.0.5-k3s2
+```
+
+Then, you can access the Argo CD UI with the URL format `http://<node_ip_address>:<node_port_number>`.
+
+*For Example,* the Argo CD UI URL is http://192.168.10.20:30080
+
+![screenshot-argocd-login-ui](./images/img_screenshot_argocd_login_ui.png)
 
