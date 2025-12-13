@@ -17,7 +17,7 @@ This hands-on practical guide is to demonstrate GitOps CI/CD automation in Kuber
 
  - **GitLab CI:** For Continuous Integration (CI) tool.
 
- - **Harbor Container Registry:** For storing the container images.
+ - **Harbor Container Registry:** For storing and hosting the container images.
 
  - **Kubernetes:** A container orchestration system for managing the containerized applications.
 
@@ -45,7 +45,7 @@ This hands-on practical guide is to demonstrate GitOps CI/CD automation in Kuber
 - **Setup (6): Configuring Argo CD Image Updater**  
   _In this section, you'll learn how to set up and configure [Argo CD Image Updater](https://argocd-image-updater.readthedocs.io/en/stable/) to automate updating and pulling the Docker container images automatically on Kubernetes._
 
-This GitOps CI/CD in Kubernetes hands-on practical guide is based on Poom Wettayakorn's [webapp](https://gitlab.com/gitops-argocd-demo/webapp), but I will share more details and focus on a beginner-friendly guide.
+This hands-on practical guide on GitOps in Kubernetes is based on Poom Wettayakorn's [webapp](https://gitlab.com/gitops-argocd-demo/webapp), but I will share more details and focus on a beginner-friendly guide.
 
 ## Before You Begin
 
@@ -1129,12 +1129,12 @@ You have set up the NodePort Service type in the Podinfo Helm Chart. So, you can
 Please, see the **Service** configuration by the running the `kubectl get service` command. 
 
 ```sh
-$ kubectl get service podinfo-app-dev --namespace sandbox
+$ kubectl get service podinfo-app-dev --namespace dev
 ```
 
 ```sh
 NAME                  TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
-podinfo-app-dev   NodePort   10.43.175.76   <none>        80:30352/TCP   63d
+podinfo-app-dev       NodePort   10.43.175.76   <none>        80:30352/TCP   63d
 ```
 
 To get the **NodePort** port number of the Podinfo Service, run the following `kubectl` command. In this example, NodePort is **`30352`**. *(Replace with your Service Name and Namespace.)*
@@ -1145,7 +1145,7 @@ $ kubectl describe service podinfo-app-dev --namespace sandbox
 
 ```sh
 Name:                     podinfo-app-dev
-Namespace:                sandbox
+Namespace:                dev
 ...
 Type:                     NodePort
 IP Family Policy:         SingleStack
@@ -1301,20 +1301,37 @@ kubectl get node -o wide
 ```
 ```
 AME                    STATUS   ROLES                  AGE   VERSION        INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                      KERNEL-VERSION                 CONTAINER-RUNTIME
-airnav-dev-k3s-server   Ready    control-plane,master   76d   v1.33.4+k3s1   192.168.10.20   <none>        AlmaLinux 9.6 (Sage Margay)   5.14.0-570.42.2.el9_6.x86_64   containerd://2.0.5-k3s2
+airnav-dev-k3s-server   Ready    control-plane,master   76d   v1.33.4+k3s1   192.168.x.x   <none>        AlmaLinux 9.6 (Sage Margay)   5.14.0-570.42.2.el9_6.x86_64   containerd://2.0.5-k3s2
 ```
 
 Then, you can access the Argo CD UI with the URL format `http://<node_ip_address>:<node_port_number>`.
 
-*For Example,* the Argo CD UI URL is http://192.168.10.20:30080
+*For Example,* the Argo CD UI URL is http://192.168.x.x:30080
 
 ![screenshot-argocd-login-ui](./images/img_screenshot_argocd_login_ui.png)
 
 ### Understanding the GitOps Repository Structure and Argo CD App Configuration
 
-Before you deploy the apps with Argo CD, we need to understand how the GitOps repository is organized and structured. In this guide, I will use the following GitOps repository as a sample repository to demonstrate GitOps Argo CD on Kubernetes.
+> [!TIP]
+>
+> Before you deploy the Podinfo Helm Chart with Argo CD, I recommend you test and first create a simple Argo CD application using the following example Git repository provided by the Argo project.
+>
+> Argo CD Example Apps: [https://github.com/argoproj/argocd-example-apps](https://github.com/argoproj/argocd-example-apps)
+>
+> To create an Argo CD application, we have two ways:
+>
+>  - Using the Argo CD CLI
+>  - Using the Argo CD Web UI
+>
+> Read more on how to create a simple Argo CD application from the Git repository: [https://argo-cd.readthedocs.io/en/stable/getting_started/#6-create-an-application-from-a-git-repository](https://argo-cd.readthedocs.io/en/stable/getting_started/#6-create-an-application-from-a-git-repository)
+>
+> In this guide, I will use only the user-friendly Argo CD Web UI to create the Argo CD applications.
+
+Make sure you understand how our GitOps repository is organized and structured. In this guide, I will use the following GitOps repository as a sample Git repository to demonstrate GitOps Argo CD on Kubernetes.
 
 Sample GitOps Repository: [https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev](https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev)
+
+GitOps Repository Structure:
 
 ```sh
 .
@@ -1322,27 +1339,31 @@ Sample GitOps Repository: [https://gitlab.com/thezawzaw/k8s-gitops-airnav-dev](h
 │   └── apps
 │       ├── Chart.yaml
 │       ├── templates
-│       │   ├── guestbook.yaml
 │       │   ├── namespace-resources.yaml
 │       │   └── podinfo-app.yaml
 │       └── values.yaml
 ├── helm
-│   ├── guestbook
 │   └── podinfo-app
 ├── kustomize
 │   └── namespace-resources
 └── README.md
 ```
 
- - `argocd/apps`: Argo CD applications.
+  - `argocd/apps`: A composed app (App of Apps pattern) to deploy the apps at once. *In this example,* when you create an Argo CD app (root app) via the UI, Argo CD automatically creates the apps (child apps) under `argocd/apps/templates/` on the Git repository.
 
- - `helm`: Kubernetes Helm charts for various apps. *For example,* the Podinfo Python sample app. You've written this Helm chart in the previous step.
+  - `helm`: Kubernetes Helm charts to deploy your web apps and tools. *In this example,* the Podinfo Helm Chart. You've written this Helm Chart in the previous section.
 
- - `kustomize/namespace-resources`: Required namespace resources. *For example,* Docker image pull secrets are used by various Kubernetes Helm Charts.
+  - `kustomize/namespace-resources`: Required Namespace resources. *For example,* Docker image pull secrets for various namespaces are used by Kubernetes Helm Charts to pull the container images from the private container registry. *(It's ONLY NEEDED when you use a private Container registry.)*
 
- Reference: [https://github.com/argoproj/argocd-example-apps](https://github.com/argoproj/argocd-example-apps)
+    > Kustomize is a native Kubernetes management tool that lets you customize plain YAML manifests for multiple purposes.
+    >
+    > If you are not familiar with Kustomize, you can learn how to use Kustomize with the following guides.
+    >
+    >  - Installation: [https://kustomize.io/](https://kustomize.io/) (The `kubectl` CLI tool supports Kustomize by default. You can check with `kubectl kustomize`.)
+    >  - Usage: [https://github.com/kubernetes-sigs/kustomize/blob/master/README.md#usage](https://github.com/kubernetes-sigs/kustomize/blob/master/README.md#usage)
+    >  - Declarative Management of Kubernetes Objects Using Kustomize: [https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/)
 
-**An Argo CD application** is a Custom Resource Definition (CRD) that provides declarative configuration to deploy the apps from the Git repository or Helm repository.
+**An Argo CD application** is a Custom Resource Definition (CRD) in Kubernetes that provides declarative configuration to deploy the apps from the Git repository or Helm repository.
 
 *For Example,*
 
@@ -1396,9 +1417,9 @@ spec:
     targetRevision: main
 ```
 
-That means Argo CD deploys the Podinfo Helm chart `helm/podinfo-app` using the Git repository. Make sure you have your GitOps repository's `repoURL`, `targetRevision` (branch name), and `path`.
+That means Argo CD deploys the Podinfo Helm Chart (`helm/podinfo-app`) using the Git repository. Make sure you set your GitOps repository's `repoURL`, `targetRevision` (branch name), and `path`.
 
-You will learn how to create Argo CD applications to deploy the Helm Chars or plain YAML manifests.
+In the next section, you will learn how to create Argo CD applications using the Argo CD Web UI to deploy the Helm Charts and plain YAML manifests.
 
 ### Deploying the Podinfo Helm Chart with Argo CD
 
@@ -1476,4 +1497,30 @@ To create an Argo CD application, click the <kbd>+ NEW APP</kbd> button and then
 ![screenshot-argocd-create-app](./images/img_screenshot_argocd_create_app.png)
 
 ![screenshot-argocd-create-app-page2](./images/img_screenshot_argocd_create_app_2.png)
+
+Then, you can check your Argo CD apps via the UI or check with the comman-line tool.
+
+```sh
+kubectl get pods --namespace dev
+```
+
+```sh
+NAME                             READY   STATUS    RESTARTS   AGE
+podinfo-app-dev-69644fbb85-48c89    1/1     Running   0          3m58s
+```
+
+Same as the previous Helm Chart section, you see the **Service** configuration by the running the `kubectl get service` command. 
+
+```sh
+$ kubectl get service podinfo-app-dev --namespace dev
+```
+
+```sh
+NAME                  TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+podinfo-app-dev       NodePort   10.43.175.76   <none>        80:30352/TCP   63d
+```
+
+Then, you can now access the Podinfo Python application via [http://192.168.x.x:30352](http://192.168.x.x:30352). *(Replace with your actual Node IP address and NodePort number.)*.
+
+![screenshot-podinfo-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
 
