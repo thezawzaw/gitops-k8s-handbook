@@ -75,7 +75,7 @@ Before you begin, make sure you are familiar with Docker.
 
  - Docker for Beginners: https://docker-curriculum.com/
 
-### Introduction to a sample app
+### Introduction to a sample Python app
 
 In this guide, I will use the [podinfo-sample](https://gitlab.com/thezawzaw/podinfo-sample) Python application to demonstrate building a fully automated GitOps CI/CD pipeline in Kubernetes. 
 
@@ -86,7 +86,7 @@ Podinfo is an open-source and simple Python Flask application, originally develo
  - **Pod Name**
  - **Pop IP Address**
 
-![screenshot-podinfo-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
+![screenshot-podinfo-demo](./docs/images/img_screenshot_podinfo_k8s_demo.jpeg)
 
 I've forked Poom Wettayakorn's Podinfo application under my GitLab account and customized it. I will use the following customized version of the Podinfo sample app in this GitOps hands-on practical guide.
 
@@ -190,7 +190,7 @@ To test the Podinfo application locally, open the following localhost address in
 
 URL: [http://localhost:5005](http://localhost:5005)
 
-![screenshot-podinfo-docker](./images/img_screenshot_podinfo_docker.png)
+![screenshot-podinfo-docker](./docs/images/img_screenshot_podinfo_docker.png)
 
 ---
 
