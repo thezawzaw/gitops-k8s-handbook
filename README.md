@@ -1,16 +1,14 @@
-# GitOps in Kubernetes Guide
+# GitOps CI/CD in Kubernetes Handbook
 
-## A Hands-on Practical Guide to Building a Fully Automated CI/CD Pipeline Using GitLab CI, GitOps Argo CD, and Argo CD Image Updater on Kubernetes
+## A comprehensive and hands-on practical guide to building a fully automated CI/CD pipeline using GitLab CI, GitOps Argo CD, and Argo CD image updater on the Kubernetes platform
 
-![gitops-featured-image](./docs/images/img_k8s_gitops_cicd_drawio.png)
+![cover-image-gitops-k8s-workflow](./docs/images/img_k8s_gitops_cicd_drawio.png)
 
 ## Introduction
 
 This hands-on practical guide is to demonstrate GitOps in Kubernetes with GitLab CI, Argo CD, and Argo CD Image Updater using the [podinfo-sample](https://gitlab.com/thezawzaw/podinfo-sample) Python application. It mainly focuses on building an end-to-end fully automated CI/CD pipeline—how to containerize an application, configure Continuous Integration (CI) and Continuous Deployment (CD), and fully automate application deployment on Kubernetes.
 
-## Summary: Objectives
-
-### Tech Stack and Tools
+**Tools I've used:**
 
  - **Docker:** For containerizing the application.
 
@@ -24,24 +22,26 @@ This hands-on practical guide is to demonstrate GitOps in Kubernetes with GitLab
 
  - **Argo CD Image Updater:** For automatically updating the container image of Argo CD-managed applications.
 
-### What You'll Learn in this Guide
+## Summary: Objectives
 
-- **Step (1): Containerizing an application**  
+What you'll learn in this guide:
+
+- **[Step 1] Containerizing an application**  
   _In this section, you'll learn how to write a [Dockerfile](https://docs.docker.com/reference/dockerfile/) to containerize a sample Python application._
 
-- **Step (2): Building GitLab CI Pipeline**  
+- **[Step 2] Building GitLab CI Pipeline**  
   _In this section, you'll learn how to configure a [GitLab CI](https://docs.gitlab.com/ci/) pipeline to build and push Docker container images using Buildah._
 
-- **Step (3): Creating a Kubernetes Cluster**  
+- **[Step 3] Creating a Kubernetes Cluster**  
   _In this you'll learn how to set up a Kubernetes Cluster with [K3s, Lightweight Kubernetes](https://k3s.io/)._
  
-- **Step (4): Writing a Kubernetes Helm Chart from Scratch**  
+- **[Step 4] Writing a Kubernetes Helm Chart from Scratch**  
   _In this section, you'll learn how to write a [Helm Chart](https://helm.sh/) to deploy the Podinfo Python sample application on Kubernetes._
 
-- **Step (5): Configuring GitOps Argo CD on Kubernetes**  
+- **[Step 5] Configuring GitOps Argo CD on Kubernetes**  
   _In this section, you'll learn how to set up and configure [Argo CD](https://argo-cd.readthedocs.io/en/stable/) as GitOps CD to deploy applications automatically on Kubernetes._
 
-- **Setup (6): Configuring Argo CD Image Updater**  
+- **[Setup 6] Configuring Argo CD Image Updater**  
   _In this section, you'll learn how to set up and configure [Argo CD Image Updater](https://argocd-image-updater.readthedocs.io/en/stable/) to automate updating the Docker container images automatically on Kubernetes._
 
 This hands-on practical guide on GitOps in Kubernetes is based on Poom Wettayakorn's [webapp](https://gitlab.com/gitops-argocd-demo/webapp), but I will share more details and focus on a beginner-friendly guide.
@@ -50,7 +50,7 @@ This hands-on practical guide on GitOps in Kubernetes is based on Poom Wettayako
 
 Make sure you have installed the following:
 
-- Familiar with basic Linux commands
+- Familiar with basic Linux & Git commands
 - Docker Engine
 - Linux installed VM or server or local machine (e.g., Ubuntu, Fedora, RHEL, etc.)
 
@@ -64,7 +64,7 @@ GitOps delivers:
  - Improved reliability and visibility with Git version control.
  - Consistency across clusters, cloud, and on-premises environments.
 
-## [1] Containerizing an application
+## [Step 1] Containerizing an application
 
 Before you begin, make sure you are familiar with Docker.
 
@@ -192,9 +192,11 @@ URL: [http://localhost:5005](http://localhost:5005)
 
 ![screenshot-podinfo-docker](./docs/images/img_screenshot_podinfo_docker.png)
 
+
 ---
 
-## [2] Building a GitLab CI Pipeline
+
+## [Step 2] Building a GitLab CI Pipeline
 
 ### Introduction to GitLab CI
 
@@ -481,9 +483,11 @@ Successfully tagged harbor-repo-example.io/library/podinfo-sample:latest
 ...
 ```
 
+
 ---
 
-## [3] Creating a Kubernetes Cluster with K3s
+
+## [Step 3] Creating a Kubernetes Cluster with K3s
 
 > [!NOTE]
 >
@@ -571,9 +575,11 @@ You can also use the official Kubernetes Dashboard. It is a general-purpose and 
 
 Please, see the detailed documentation on how to install Kubernetes Dashboard: [https://github.com/kubernetes/dashboard/blob/master/README.md#installation](https://github.com/kubernetes/dashboard/blob/master/README.md#installation)
 
+
 ---
 
-## [4] Writing a Kubernetes Helm Chart from Scratch
+
+## [Step 4] Building a Kubernetes Helm Chart from Scratch
 
 Before you write a Kubernetes Helm chart for the Podinfo sample application, make sure you understand **Kubernetes core components**, **Kubernete objects** and **workloads resources** first. If you are not familiar with Kubernetes, you can start with the [Kubernetes Basics](https://kubernetes.io/docs/tutorials/kubernetes-basics) tutorial.
 
@@ -1179,9 +1185,11 @@ http://192.168.10.20:30352
 
 Now, you can see **Namespace**, **Node Name**, **Pod Name**, and **Pod IP** address information in the UI of the Podinfo application.
 
+
 ---
 
-## [5] Installing and Configuring Argo CD on Kubernetes
+
+## [Step 5] Installing and Configuring Argo CD on Kubernetes
 
 ![screenshot-argocd-ui](./docs/images/img_screenshot_argocd_ui.png)
 
@@ -1549,7 +1557,11 @@ Then, you can now access the Podinfo Python application via [http://192.168.x.x:
 
 ![screenshot-podinfo-demo](./docs/images/img_screenshot_podinfo_k8s_demo.jpeg)
 
-## [6] Installing and Configuring Argo CD Image Updater
+
+---
+
+
+## [Step 6] Installing and Configuring Argo CD Image Updater
 
 In this section, you will learn how to install and set up the Argo CD Updater on Kubernetes for updating the container images of the applications deployed and managed by Argo CD.
 
@@ -1679,7 +1691,11 @@ metadata:
 
 Reference: [https://github.com/thezawzaw/kubernetes-gitops-guide/-/blob/main/helm/podinfo-app/.argocd-source-podinfo-app-dev.yaml](https://github.com/thezawzaw/kubernetes-gitops-guide/-/blob/main/helm/podinfo-app/.argocd-source-podinfo-app-dev.yaml)
 
-## Demo: Testing a Fully Automated CI/CD Pipeline
+
+---
+
+
+## [Demo] Testing a Fully Automated CI/CD Pipeline
 
 Now, you can test now by making some UI changes in the source Podinfo application. 
 
@@ -1710,4 +1726,6 @@ Then, wait for 2 to 3 minutes after GitLab CI jobs have passed. Then, you will s
 ## Credit and Thanks
 
 Credit and thanks to [@poom.wettayakorn](https://medium.com/@poom.wettayakorn) for the [Podinfo](https://gitlab.com/gitops-argocd-demo/webapp) Python application to demonstrate GitOps in Kubernetes using GitLab CI, Argo CD, and Argo CD Image Updater.
+
+---
 
