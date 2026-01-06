@@ -82,7 +82,7 @@ Podinfo is an open-source and simple Python Flask application, originally develo
  - **Pod Name**
  - **Pop IP Address**
 
-![screenshot-podinfo-demo](./docs/images/img_screenshot_podinfo_k8s_demo.jpeg)
+![screenshot-podinfo-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
 
 I've forked Poom Wettayakorn's Podinfo application under my GitLab account and customized it. I will use the following customized version of the Podinfo sample app in this GitOps hands-on practical guide.
 
@@ -186,7 +186,7 @@ To test the Podinfo application locally, open the following localhost address in
 
 URL: [http://localhost:5005](http://localhost:5005)
 
-![screenshot-podinfo-docker](./docs/images/img_screenshot_podinfo_docker.png)
+![screenshot-podinfo-docker](./images/img_screenshot_podinfo_docker.png)
 
 
 ---
@@ -535,7 +535,7 @@ For a UI dashboard to manage your Kubernetes clusters, I recommend you use Freel
 
 #### Freelens Kubernetes IDE
 
-![screenshot-freelens-ide](./docs/images/img_screenshot_freelens_ide.png)
+![screenshot-freelens-ide](./images/img_screenshot_freelens_ide.png)
 
 In this guide, I will use Freelens, a Kubernetes IDE, to manage the K3s Kubernetes cluster.
 
@@ -562,7 +562,7 @@ For more option on installing the Freelens package, please see on GitHub: [https
 
 #### Kubernetes Dashboard
 
-![screenshot-k8s-dashboard](./docs/images/img_screenshot_k8s_dashboard.png)
+![screenshot-k8s-dashboard](./images/img_screenshot_k8s_dashboard.png)
 
 You can also use the official Kubernetes Dashboard. It is a general-purpose and web-based UI that allows users to manage the Kubernetes clusters and containerized applications running in the cluster and troubleshoot them.
 
@@ -634,7 +634,7 @@ In the Podinfo Python application, it will display the following information in 
 
 For example,
 
-![screenshot-podinfo-details](./docs/images/img_screenshot_cropped_podinfo.jpeg)
+![screenshot-podinfo-details](./images/img_screenshot_cropped_podinfo.jpeg)
 
 Basically, the Podinfo Python application retrieves the data or information dynamically via the Kubernetes environment variables. So, you need to expose the Pod and Node information to the container via the environment variables in Kubernetes. Then, the app uses these environment variables to retrieve information dynamically.
 
@@ -1177,7 +1177,7 @@ Then, you can access the following URL in your web browser.
 http://192.168.10.20:30352
 ```
 
-![screenshot-podinfo-helm-demo](./docs/images/img_screenshot_podinfo_k8s_demo.jpeg)
+![screenshot-podinfo-helm-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
 
 Now, you can see **Namespace**, **Node Name**, **Pod Name**, and **Pod IP** address information in the UI of the Podinfo application.
 
@@ -1187,7 +1187,7 @@ Now, you can see **Namespace**, **Node Name**, **Pod Name**, and **Pod IP** addr
 
 ## [Step 5] Installing and Configuring Argo CD on Kubernetes
 
-![screenshot-argocd-ui](./docs/images/img_screenshot_argocd_ui.png)
+![screenshot-argocd-ui](./images/img_screenshot_argocd_ui.png)
 
 In this section, you will learn how to install and configure Argo CD on Kubernetes to deploy the apps automatically using the GitOps repositories. For example, GitLab or GitHub repositories.
 
@@ -1312,7 +1312,7 @@ Then, you can access the Argo CD UI with the URL format `http://<node_ip_address
 
 *For Example,* the Argo CD UI URL is http://192.168.x.x:30080
 
-![screenshot-argocd-login-ui](./docs/images/img_screenshot_argocd_login_ui.png)
+![screenshot-argocd-login-ui](./images/img_screenshot_argocd_login_ui.png)
 
 ### Understanding the GitOps Repository Structure and Argo CD App Configuration
 
@@ -1469,7 +1469,7 @@ Go to <kbd>Settings</kbd> ⟶  <kbd>Repositories</kbd> ⟶  <kbd>+ CONNECT REPO<
 
  - `SSH private key data`: Set your SSH private key data.
 
-![screenshot-argocd-connect-repo](./docs/images/img_screenshot_argocd_connect_git_repo.png)
+![screenshot-argocd-connect-repo](./images/img_screenshot_argocd_connect_git_repo.png)
 
 After connect to your GitOps repository, you can now create an Argo CD application to deploy your plan Kubernetes manifests or Helm Charts from the GitOps repository.
 
@@ -1504,9 +1504,9 @@ To create an Argo CD application, click the <kbd>+ NEW APP</kbd> button and then
 
  - **Namespace**: By default, Argo CD use the `argocd` namespace for deploying the *Argo CD* applications.
 
-![screenshot-argocd-create-app](./docs/images/img_screenshot_argocd_create_app.png)
+![screenshot-argocd-create-app](./images/img_screenshot_argocd_create_app.png)
 
-![screenshot-argocd-create-app-page2](./docs/images/img_screenshot_argocd_create_app_2.png)
+![screenshot-argocd-create-app-page2](./images/img_screenshot_argocd_create_app_2.png)
 
 Then, Argo CD deploys the following multiple Argo CD apps at once under the `argocd/apps/templates` directory. You can also check on the Argo CD Web UI.
 
@@ -1551,7 +1551,7 @@ podinfo-app-dRev       NodePort   10.43.175.76   <none>        80:30352/TCP   63
 
 Then, you can now access the Podinfo Python application via [http://192.168.x.x:30352](http://192.168.x.x:30352). *(Replace with your actual Node IP address and NodePort number.)*.
 
-![screenshot-podinfo-demo](./docs/images/img_screenshot_podinfo_k8s_demo.jpeg)
+![screenshot-podinfo-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
 
 
 ---
@@ -1717,11 +1717,9 @@ index 57589af..2de8134 100755
 
 Then, wait for 2 to 3 minutes after GitLab CI jobs have passed. Then, you will see version change in the Podinfo application.
 
-![screenshot-podinfo-k8s-demo](./docs/images/img_screenshot_podinfo_k8s_demo.jpeg)
+![screenshot-podinfo-k8s-demo](./images/img_screenshot_podinfo_k8s_demo.jpeg)
 
 ## Credit and Thanks
 
 Credit and thanks to [@poom.wettayakorn](https://medium.com/@poom.wettayakorn) for the [Podinfo](https://gitlab.com/gitops-argocd-demo/webapp) Python application to demonstrate GitOps in Kubernetes using GitLab CI, Argo CD, and Argo CD Image Updater.
-
----
 
