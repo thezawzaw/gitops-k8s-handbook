@@ -1,7 +1,7 @@
 title: "GitOps CI/CD in Kubernetes Handbook"
 description: "A comprehensive and hands-on practical guide to building a fully automated CI/CD pipeline using GitLab CI, GitOps Argo CD, and Argo CD image updater on the Kubernetes platform"
 show_downloads: true
-remote_theme: pages-themes/slate@v0.2.0
+remote_theme: pages-themes/cayman@v0.2.0
 plugins:
 - jekyll-remote-theme
 
